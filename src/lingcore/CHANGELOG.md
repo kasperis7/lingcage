@@ -65,3 +65,5 @@
 - \[[#20](https://github.com/lingcage/lingcage/pull/20)\] Fix orders waiting out the poll slice: the
   control thread wakes the thread holding the guest through an eventfd, so an order no longer waits
   up to 50 ms.
+- \[[#21](https://github.com/lingcage/lingcage/pull/21)\] Fix socket left behind by `Sockets`: the
+  endpoint removes the socket it bound once dropped, and refuses an empty prefix.
