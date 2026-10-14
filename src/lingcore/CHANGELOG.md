@@ -28,6 +28,9 @@
   readable once the guest is told to stop or loses a page of its RAM image.
 - \[[#20](https://github.com/lingcage/lingcage/pull/20)\] Add `Receive::try_receive`: bytes queued
   for the guest without waiting for a device held by another thread.
+- \[[#21](https://github.com/lingcage/lingcage/pull/21)\] Add prefix to `--channel`: `CID=PREFIX`
+  serves the ports over the socket PREFIX and over `PREFIX_<port>`, in place of the sockets of
+  `--vsock`.
 
 ### Changed
 
