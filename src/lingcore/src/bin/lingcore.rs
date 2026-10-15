@@ -661,14 +661,21 @@ mod imp {
                 let (cid, prefix) = parse_channel(text).map_err(usage_err)?;
                 // Ports are served over the prefix or over sockets of
                 // `--vsock`, one of the two.
-                if prefix.is_some() && !vsock.is_empty() {
-                    return Err(usage_err(
-                        "--vsock needs --channel without a prefix".to_string(),
-                    ));
-                }
+                let at = match (prefix, vsock.is_empty()) {
+                    (Some(at), true) => at,
+                    (None, false) => PathBuf::new(),
+                    (Some(_), false) => {
+                        return Err(usage_err(
+                            "--vsock needs --channel without a prefix".to_string(),
+                        ));
+                    }
+                    (None, true) => {
+                        return Err(usage_err("--channel needs a prefix or --vsock".to_string()));
+                    }
+                };
                 Some(Channel {
                     cid,
-                    at: prefix.unwrap_or_default(),
+                    at,
                     named: vsock,
                 })
             }
@@ -1402,6 +1409,7 @@ mod imp {
                 vec!["--kernel", "k", "--timeout", "soon"],
                 vec!["--kernel", "k", "--verbose=2"],
                 vec!["--kernel", "k", "--balloon=1"],
+                vec!["--kernel", "k", "--channel", "3"],
                 vec!["--kernel", "k", "--channel", "3="],
                 vec!["--kernel", "k", "--channel", "3= "],
                 vec!["--kernel", "k", "--channel", "x=vs"],

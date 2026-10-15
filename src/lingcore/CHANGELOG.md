@@ -73,3 +73,5 @@
 - \[[#21](https://github.com/lingcage/lingcage/pull/21)\] Fix socket left behind by `Named`: the
   socket of a port bound for `--vsock` is removed once the endpoint is dropped, so a later run binds
   the same path.
+- \[[#21](https://github.com/lingcage/lingcage/pull/21)\] Fix channel with no socket failing at
+  start: `--channel` with no prefix needs `--vsock`, refused as a usage error.
