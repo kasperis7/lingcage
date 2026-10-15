@@ -75,3 +75,6 @@
   the same path.
 - \[[#21](https://github.com/lingcage/lingcage/pull/21)\] Fix channel with no socket failing at
   start: `--channel` with no prefix needs `--vsock`, refused as a usage error.
+- \[[#21](https://github.com/lingcage/lingcage/pull/21)\] Fix context id taken outside the vsock
+  range: `--channel` refuses an id under 3 or from `u32::MAX` up, reserved by vsock or cut to 32
+  bits in the guest.

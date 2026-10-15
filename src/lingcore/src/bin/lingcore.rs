@@ -578,9 +578,17 @@ mod imp {
             Some((cid, prefix)) => (cid, Some(prefix)),
             None => (text, None),
         };
-        let cid = cid
+        let cid: u64 = cid
             .parse()
             .map_err(|_| format!("invalid context id {cid}, use a number"))?;
+        // Vsock reserves ids under 3 and u32::MAX. A guest keeps 32 bits of
+        // its id.
+        if !(3..u64::from(u32::MAX)).contains(&cid) {
+            return Err(format!(
+                "invalid context id {cid}, use 3 to {}",
+                u32::MAX - 1
+            ));
+        }
         match prefix {
             // Blank prefix would bind sockets named by blanks.
             Some(prefix) if prefix.trim().is_empty() => {
@@ -1381,6 +1389,8 @@ mod imp {
             let channel = config_of(&parse(&args).unwrap()).unwrap().channel.unwrap();
             assert!(channel.at.as_os_str().is_empty());
             assert_eq!(channel.named.len(), 1);
+            // Last id before u32::MAX is taken.
+            assert_eq!(parse_channel("4294967294=/run/vs").unwrap().0, 4294967294);
         }
 
         #[test]
@@ -1413,6 +1423,8 @@ mod imp {
                 vec!["--kernel", "k", "--channel", "3="],
                 vec!["--kernel", "k", "--channel", "3= "],
                 vec!["--kernel", "k", "--channel", "x=vs"],
+                vec!["--kernel", "k", "--channel", "2=vs"],
+                vec!["--kernel", "k", "--channel", "4294967295=vs"],
                 vec!["--kernel", "k", "--channel", "3=vs", "--vsock", "1=one"],
                 vec!["--kernel", "k", "-vx"],
                 vec!["--kernel", "k", "extra"],
