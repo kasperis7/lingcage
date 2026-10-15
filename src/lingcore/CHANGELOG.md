@@ -70,3 +70,6 @@
   up to 50 ms.
 - \[[#21](https://github.com/lingcage/lingcage/pull/21)\] Fix socket left behind by `Sockets`: the
   endpoint removes the socket it bound once dropped, and refuses an empty prefix.
+- \[[#21](https://github.com/lingcage/lingcage/pull/21)\] Fix socket left behind by `Named`: the
+  socket of a port bound for `--vsock` is removed once the endpoint is dropped, so a later run binds
+  the same path.

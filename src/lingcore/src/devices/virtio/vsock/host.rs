@@ -216,7 +216,7 @@ pub struct Named {
     /// Socket opened for each port the guest reaches out on.
     dialled: BTreeMap<u32, PathBuf>,
     /// Listener bound for each port the host process reaches in on.
-    bound: Vec<(u32, UnixListener)>,
+    bound: Vec<(u32, Bound)>,
 }
 
 impl Named {
@@ -231,11 +231,10 @@ impl Named {
     }
 
     /// Serve `port` by binding `at` and handing the guest each connection
-    /// taken there. A name already bound is refused, not unlinked.
+    /// taken there. A name already bound is refused, not unlinked. Socket
+    /// is removed with the endpoint.
     pub fn listen(&mut self, port: u32, at: impl AsRef<Path>) -> io::Result<()> {
-        let listener = UnixListener::bind(at)?;
-        // Blocking accept would stall the thread which serves connections.
-        listener.set_nonblocking(true)?;
+        let listener = Bound::new(at.as_ref())?;
         self.bound.push((port, listener));
         Ok(())
     }
@@ -627,6 +626,21 @@ mod named_tests {
         let (port, _stream) = named.incoming().expect("the connection was not taken");
         assert_eq!(port, 6000, "the connection landed on another port");
         assert!(!named.acknowledges(), "a named port answers a line");
+        let _ = std::fs::remove_dir_all(&at);
+    }
+
+    #[test]
+    fn test_bound_port_removed_with_endpoint() {
+        let at = dir("removed");
+        let (bound, dialled) = (at.join("in"), at.join("out"));
+        let _listening = UnixListener::bind(&dialled).expect("bind the host end");
+        let mut named = Named::new();
+        named.listen(6000, &bound).expect("bind the port");
+        named.dial(6001, &dialled);
+        drop(named);
+        assert!(!bound.exists(), "socket of the port is still there");
+        // Socket a port dials belongs to its listener.
+        assert!(dialled.exists(), "socket of another listener was removed");
         let _ = std::fs::remove_dir_all(&at);
     }
 
