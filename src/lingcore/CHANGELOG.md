@@ -31,6 +31,9 @@
 - \[[#21](https://github.com/lingcage/lingcage/pull/21)\] Add prefix to `--channel`: `CID=PREFIX`
   serves the ports over the socket PREFIX and over `PREFIX_<port>`, in place of the sockets of
   `--vsock`.
+- \[[#21](https://github.com/lingcage/lingcage/pull/21)\] Add `Sockets::names` and `Named::names`:
+  socket files an endpoint bound, for its owner to remove with `SocketName::remove` on a thread
+  allowed to.
 
 ### Changed
 
@@ -69,9 +72,9 @@
   control thread wakes the thread holding the guest through an eventfd, so an order no longer waits
   up to 50 ms.
 - \[[#21](https://github.com/lingcage/lingcage/pull/21)\] Fix socket left behind by `Sockets`: the
-  endpoint removes the socket it bound once dropped, and refuses an empty prefix.
+  machine removes the socket of the prefix once dropped, and an empty prefix is refused.
 - \[[#21](https://github.com/lingcage/lingcage/pull/21)\] Fix socket left behind by `Named`: the
-  socket of a port bound for `--vsock` is removed once the endpoint is dropped, so a later run binds
+  socket of a port bound for `--vsock` is removed once the machine is dropped, so a later run binds
   the same path.
 - \[[#21](https://github.com/lingcage/lingcage/pull/21)\] Fix channel with no socket failing at
   start: `--channel` with no prefix needs `--vsock`, refused as a usage error.
